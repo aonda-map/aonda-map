@@ -7,62 +7,153 @@
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <style>
-    html, body { height: 100%; margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    html, body { 
+      height: 100%; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Arial', sans-serif;
+    }
+    #map { 
+      position: absolute; 
+      top: 0; 
+      bottom: 0; 
+      width: 100%; 
+    }
+    .mapboxgl-popup-content {
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .popup-title {
+      font-weight: bold;
+      font-size: 16px;
+      color: #d04e7c;
+      margin-bottom: 8px;
+    }
+    .popup-info {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+    .popup-link {
+      color: #d04e7c;
+      text-decoration: none;
+    }
+    .popup-link:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
+  
   <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiYW9uZGEiLCJhIjoiY21janQ5M2w4MDc2NTJrcTV2bmt5N2U5ZiJ9.KvPbGg8-gbhEdkMWv8tDeQ';
-
+    
     const map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: 'mapbox://styles/aonda/cmcl95wcg008l01s0573uba6f',
       center: [-70.6483, -33.4569],
       zoom: 11
     });
-
+    
     // ⏳ Esperar que el mapa cargue
     map.on('load', () => {
-      fetch('https://script.google.com/macros/s/AKfycbzUFI4NBMvDa8a4dWGyEvNBzPz4I8yrYEjtF_xi_QM0QlyMvs7GZUQeUa0xtiug_l50/exec')
-        .then(response => response.json())
+      console.log('🗺️ Mapa cargado, obteniendo datos...');
+      
+      fetch('https://script.google.com/macros/s/AKfycbz5fQiPq4Impv7Pwo1ovrCxGYGM6y5D5hVY-JnCIT0JOwGeZ0m6xbBIJ80frXGpeRDH/exec')
+        .then(response => {
+          console.log('📡 Respuesta recibida:', response.status);
+          return response.json();
+        })
         .then(data => {
+          console.log('📊 Datos GeoJSON:', data);
+          
+          if (!data.features || data.features.length === 0) {
+            console.warn('⚠️ No hay features en los datos');
+            return;
+          }
+          
+          console.log(`✅ ${data.features.length} puntos encontrados`);
+          
           map.addSource('artistas', {
             type: 'geojson',
             data: data
           });
-
+          
           map.addLayer({
             id: 'puntos-artistas',
             type: 'circle',
             source: 'artistas',
             paint: {
-              'circle-radius': 6,
+              'circle-radius': 8,
               'circle-color': '#d04e7c',
-              'circle-opacity': 0.8
+              'circle-opacity': 0.8,
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#ffffff'
             }
           });
-
-          // Popups
+          
+          console.log('🎯 Layer agregado al mapa');
+          
+          // Popups con información completa
           map.on('click', 'puntos-artistas', (e) => {
             const props = e.features[0].properties;
-            new mapboxgl.Popup()
+            
+            let popupContent = `<div class="popup-title">${props.nombre}</div>`;
+            
+            if (props.disciplina) {
+              popupContent += `<div class="popup-info"><strong>Disciplina:</strong> ${props.disciplina}</div>`;
+            }
+            
+            if (props.descripcion) {
+              popupContent += `<div class="popup-info"><strong>Trabajo:</strong> ${props.descripcion}</div>`;
+            }
+            
+            if (props.enlace && props.enlace !== 'no tengo') {
+              popupContent += `<div class="popup-info"><a href="${props.enlace}" target="_blank" class="popup-link">Ver portafolio</a></div>`;
+            }
+            
+            if (props.direccion) {
+              popupContent += `<div class="popup-info"><em>${props.direccion}</em></div>`;
+            }
+            
+            new mapboxgl.Popup({ closeOnClick: false })
               .setLngLat(e.lngLat)
-              .setHTML(`<strong>${props.nombre}</strong><br>${props.disciplina}<br>`)
+              .setHTML(popupContent)
               .addTo(map);
           });
-
+          
+          // Cambiar cursor al pasar sobre los puntos
           map.on('mouseenter', 'puntos-artistas', () => {
             map.getCanvas().style.cursor = 'pointer';
           });
+          
           map.on('mouseleave', 'puntos-artistas', () => {
             map.getCanvas().style.cursor = '';
           });
+          
+          // Ajustar vista para mostrar todos los puntos
+          if (data.features.length > 0) {
+            const bounds = new mapboxgl.LngLatBounds();
+            data.features.forEach(feature => {
+              if (feature.geometry && feature.geometry.coordinates) {
+                bounds.extend(feature.geometry.coordinates);
+              }
+            });
+            map.fitBounds(bounds, { 
+              padding: 50,
+              maxZoom: 14
+            });
+            console.log('📍 Vista ajustada para mostrar todos los puntos');
+          }
         })
         .catch(error => {
           console.error('❌ Error al cargar datos del script:', error);
         });
+    });
+    
+    map.on('error', (e) => {
+      console.error('❌ Error del mapa:', e.error);
     });
   </script>
 </body>
