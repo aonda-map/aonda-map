@@ -1,16 +1,24 @@
-## Hi there 👋
+# 🗺️ a·onda map
 
-<!--
-**aonda-map/aonda-map** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+**a·onda map** es un prototipo de visualización web que forma parte del ecosistema cultural _a·onda_, orientado a mapear espacios de creación, encuentro y circulación artística en Chile.
 
-Here are some ideas to get you started:
+Este proyecto busca experimentar con herramientas digitales de libre acceso para visibilizar redes culturales activas, especialmente aquellas que habitan fuera de los grandes circuitos institucionales.
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+---
+
+## 🚀 Ver prototipo en línea
+
+👉 [Haz clic aquí para ver el prototipo](https://aonda-map.github.io/aonda-map/)
+
+---
+
+## 📁 Contenidos
+
+- `index.html`: archivo principal del prototipo.
+- `README.md`: este archivo.
+
+---
+
+## 💡 Sobre a·onda
+
+a·onda es un ecosistema híbrido compuesto por un festival, una revista digital, una edición impresa anual y este mapa georreferenciado. Todo con un foco en el arte local, la colaboración y la ocupación cultural del espacio.
