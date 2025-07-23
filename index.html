@@ -39,6 +39,12 @@
 </head>
 <body>
   <div id="map"></div>
+  <div class="legend">
+    <div class="legend-item">
+      <div class="color-box" style="background:#d04e7c;"></div> formulario
+    </div>
+    <div class="legend-item">
+      <div class="color-box" style="background:#ffd500;"></div> ingresos manuales
     </div>
   </div>
 
@@ -59,7 +65,7 @@
           const formularioFeatures = data.features.filter(f => f.properties.grupo === 'formulario');
           const manualesFeatures = data.features.filter(f => f.properties.grupo === 'manuales');
 
-          // ROSADO: formulario
+          // Agregar fuente y capa para formulario (rosado)
           map.addSource('formulario', {
             type: 'geojson',
             data: {
@@ -79,7 +85,7 @@
             }
           });
 
-          // AMARILLO: manuales
+          // Agregar fuente y capa para manuales (amarillo)
           map.addSource('manuales', {
             type: 'geojson',
             data: {
@@ -99,7 +105,17 @@
             }
           });
 
-          // POPUPS para ambos
+          // Zoom automático ajustando a todos los pines
+          const allFeatures = [...formularioFeatures, ...manualesFeatures];
+          if (allFeatures.length > 0) {
+            const bounds = new mapboxgl.LngLatBounds();
+            allFeatures.forEach(f => {
+              bounds.extend(f.geometry.coordinates);
+            });
+            map.fitBounds(bounds, { padding: 50, maxZoom: 14, duration: 1000 });
+          }
+
+          // Popups para ambas capas
           ['formulario-layer', 'manuales-layer'].forEach(layer => {
             map.on('click', layer, (e) => {
               const props = e.features[0].properties;
