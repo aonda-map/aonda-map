@@ -9,10 +9,44 @@
   <style>
     html, body { margin: 0; padding: 0; height: 100%; }
     #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+    /* leyenda */
+    .legend {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: white;
+      padding: 10px;
+      font-family: sans-serif;
+      font-size: 14px;
+      border-radius: 6px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .color-box {
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
+  <div class="legend">
+    <div class="legend-item">
+      <div class="color-box" style="background:#d04e7c;"></div> formulario
+    </div>
+    <div class="legend-item">
+      <div class="color-box" style="background:#ffd500;"></div> ingresos manuales
+    </div>
+  </div>
 
   <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiYW9uZGEiLCJhIjoiY21janQ5M2w4MDc2NTJrcTV2bmt5N2U5ZiJ9.KvPbGg8-gbhEdkMWv8tDeQ';
@@ -28,7 +62,6 @@
       fetch('https://script.google.com/macros/s/AKfycbwJ0sYjOe-NkQjuuVCj6IhPdVL7b5KaKSHAmnDV6HdMu6yfHx0tPNFpd0v8Lk2N2dtB/exec')
         .then(response => response.json())
         .then(data => {
-          // Separar features por grupo
           const formularioFeatures = data.features.filter(f => f.properties.grupo === 'formulario');
           const manualesFeatures = data.features.filter(f => f.properties.grupo === 'manuales');
 
@@ -47,4 +80,61 @@
             source: 'formulario',
             paint: {
               'circle-radius': 6,
-              'circle-colo
+              'circle-color': '#d04e7c',
+              'circle-opacity': 0.8
+            }
+          });
+
+          // AMARILLO: manuales
+          map.addSource('manuales', {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features: manualesFeatures
+            }
+          });
+
+          map.addLayer({
+            id: 'manuales-layer',
+            type: 'circle',
+            source: 'manuales',
+            paint: {
+              'circle-radius': 6,
+              'circle-color': '#ffd500',
+              'circle-opacity': 0.8
+            }
+          });
+
+          // POPUPS para ambos
+          ['formulario-layer', 'manuales-layer'].forEach(layer => {
+            map.on('click', layer, (e) => {
+              const props = e.features[0].properties;
+              const popupContent = `
+                <strong>${props.nombre}</strong><br>
+                <em>${props.disciplina}</em><br>
+                ${props.descripcion}<br>
+                ${props.enlace ? `<a href="${props.enlace}" target="_blank">ver portafolio</a><br>` : ''}
+                ${props.direccion}
+              `;
+              new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML(popupContent)
+                .addTo(map);
+            });
+
+            map.on('mouseenter', layer, () => {
+              map.getCanvas().style.cursor = 'pointer';
+            });
+
+            map.on('mouseleave', layer, () => {
+              map.getCanvas().style.cursor = '';
+            });
+          });
+        })
+        .catch(error => {
+          console.error('❌ Error cargando datos del script:', error);
+        });
+    });
+  </script>
+</body>
+</html>
