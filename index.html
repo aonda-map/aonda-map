@@ -59,7 +59,7 @@
     });
 
     map.on('load', () => {
-      fetch('https://script.google.com/macros/s/AKfycbwJ0sYjOe-NkQjuuVCj6IhPdVL7b5KaKSHAmnDV6HdMu6yfHx0tPNFpd0v8Lk2N2dtB/exec')
+      fetch('https://script.google.com/macros/s/AKfycbzy0FpgaRRm4JhlH-qu5TkikwcMIYcdRhBXxiCYXad54Qcg7BvqnxiYh4QXWOQpIZwP/exec')
         .then(response => response.json())
         .then(data => {
           const artistasFeatures = data.features.filter(f => f.properties.grupo === 'artistas');
