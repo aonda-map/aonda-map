@@ -62,22 +62,22 @@
       fetch('https://script.google.com/macros/s/AKfycbzy0FpgaRRm4JhlH-qu5TkikwcMIYcdRhBXxiCYXad54Qcg7BvqnxiYh4QXWOQpIZwP/exec')
         .then(response => response.json())
         .then(data => {
-          const artistasFeatures = data.features.filter(f => f.properties.grupo === 'artistas');
-          const espaciosFeatures = data.features.filter(f => f.properties.grupo === 'espacios');
+          const ArtistasFeatures = data.features.filter(f => f.properties.grupo === 'Artistas');
+          const EspaciosFeatures = data.features.filter(f => f.properties.grupo === 'Espacios');
 
           // Agregar fuente y capa para formulario (rosado)
-          map.addSource('artistas', {
+          map.addSource('Artistas', {
             type: 'geojson',
             data: {
               type: 'FeatureCollection',
-              features: artistasFeatures
+              features: ArtistasFeatures
             }
           });
 
           map.addLayer({
-            id: 'artistas-layer',
+            id: 'Artistas-layer',
             type: 'circle',
-            source: 'artistas',
+            source: 'Artistas',
             paint: {
               'circle-radius': 6,
               'circle-color': '#d04e7c',
@@ -86,18 +86,18 @@
           });
 
           // Agregar fuente y capa para manuales (amarillo)
-          map.addSource('espacios', {
+          map.addSource('Espacios', {
             type: 'geojson',
             data: {
               type: 'FeatureCollection',
-              features: espaciosFeatures
+              features: EspaciosFeatures
             }
           });
 
           map.addLayer({
-            id: 'espacios-layer',
+            id: 'Espacios-layer',
             type: 'circle',
-            source: 'espacios',
+            source: 'Espacios',
             paint: {
               'circle-radius': 6,
               'circle-color': '#ffd500',
@@ -106,7 +106,7 @@
           });
 
           // Zoom automático ajustando a todos los pines
-          const allFeatures = [...artistasFeatures, ...espaciosFeatures];
+          const allFeatures = [...ArtistasFeatures, ...EspaciosFeatures];
           if (allFeatures.length > 0) {
             const bounds = new mapboxgl.LngLatBounds();
             allFeatures.forEach(f => {
@@ -116,7 +116,7 @@
           }
 
           // Popups para ambas capas
-          ['artistas-layer', 'espacios-layer'].forEach(layer => {
+          ['Artistas-layer', 'Espacios-layer'].forEach(layer => {
             map.on('click', layer, (e) => {
               const props = e.features[0].properties;
               const popupContent = `
