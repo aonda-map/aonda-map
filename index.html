@@ -75,8 +75,8 @@
       fetch('https://script.google.com/macros/s/AKfycbwJ0sYjOe-NkQjuuVCj6IhPdVL7b5KaKSHAmnDV6HdMu6yfHx0tPNFpd0v8Lk2N2dtB/exec')
         .then(response => response.json())
         .then(data => {
-          const formularioFeatures = data.features.filter(f => f.properties.grupo === 'formulario');
-          const manualesFeatures = data.features.filter(f => f.properties.grupo === 'manuales');
+          const ArtistasFeatures = data.features.filter(f => f.properties.grupo === 'formulario');
+          const EspaciosFeatures = data.features.filter(f => f.properties.grupo === 'manuales');
 
           // 🔹 Función para dibujar rutas caminando
           async function drawWalkingRoute(id, coords, color) {
@@ -118,7 +118,7 @@
           // 🔹 Agregar markers de formulario
           map.addSource('formulario', {
             type: 'geojson',
-            data: { type: 'FeatureCollection', features: formularioFeatures }
+            data: { type: 'FeatureCollection', features: ArtistasFeatures }
           });
           map.addLayer({
             id: 'formulario-layer',
@@ -130,7 +130,7 @@
           // 🔹 Agregar markers de manuales
           map.addSource('manuales', {
             type: 'geojson',
-            data: { type: 'FeatureCollection', features: manualesFeatures }
+            data: { type: 'FeatureCollection', features: EspaciosFeatures }
           });
           map.addLayer({
             id: 'manuales-layer',
@@ -140,7 +140,7 @@
           });
 
           // 🔹 Zoom automático
-          const allFeatures = [...formularioFeatures, ...manualesFeatures];
+          const allFeatures = [...ArtistasFeatures, ...EspaciosFeatures];
           if (allFeatures.length > 0) {
             const bounds = new mapboxgl.LngLatBounds();
             allFeatures.forEach(f => bounds.extend(f.geometry.coordinates));
