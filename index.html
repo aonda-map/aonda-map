@@ -41,10 +41,10 @@
   <div id="map"></div>
   <div class="legend">
     <div class="legend-item">
-      <div class="color-box" style="background:#d04e7c;"></div> Artistas
+      <div class="color-box" style="background:#d04e7c;"></div> formulario
     </div>
     <div class="legend-item">
-      <div class="color-box" style="background:#ffd500;"></div> Espacios
+      <div class="color-box" style="background:#ffd500;"></div> manuales
     </div>
     <div class="legend-item">
       <div class="color-box" style="background:#FF5733;"></div> Ruta A
@@ -75,8 +75,8 @@
       fetch('https://script.google.com/macros/s/AKfycbwJ0sYjOe-NkQjuuVCj6IhPdVL7b5KaKSHAmnDV6HdMu6yfHx0tPNFpd0v8Lk2N2dtB/exec')
         .then(response => response.json())
         .then(data => {
-          const ArtistasFeatures = data.features.filter(f => f.properties.grupo === 'Artistas');
-          const EspaciosFeatures = data.features.filter(f => f.properties.grupo === 'Espacios');
+          const formularioFeatures = data.features.filter(f => f.properties.grupo === 'formulario');
+          const manualesFeatures = data.features.filter(f => f.properties.grupo === 'manuales');
 
           // 🔹 Función para dibujar rutas caminando
           async function drawWalkingRoute(id, coords, color) {
@@ -115,40 +115,40 @@
             [-70.6125, -33.42360]
           ], "#28A745"); // Ruta C
 
-          // 🔹 Agregar markers de Artistas
-          map.addSource('Artistas', {
+          // 🔹 Agregar markers de formulario
+          map.addSource('formulario', {
             type: 'geojson',
-            data: { type: 'FeatureCollection', features: ArtistasFeatures }
+            data: { type: 'FeatureCollection', features: formularioFeatures }
           });
           map.addLayer({
-            id: 'Artistas-layer',
+            id: 'formulario-layer',
             type: 'circle',
-            source: 'Artistas',
+            source: 'formulario',
             paint: { 'circle-radius': 6, 'circle-color': '#d04e7c', 'circle-opacity': 0.8 }
           });
 
-          // 🔹 Agregar markers de Espacios
-          map.addSource('Espacios', {
+          // 🔹 Agregar markers de manuales
+          map.addSource('manuales', {
             type: 'geojson',
-            data: { type: 'FeatureCollection', features: EspaciosFeatures }
+            data: { type: 'FeatureCollection', features: manualesFeatures }
           });
           map.addLayer({
-            id: 'Espacios-layer',
+            id: 'manuales-layer',
             type: 'circle',
-            source: 'Espacios',
+            source: 'manuales',
             paint: { 'circle-radius': 6, 'circle-color': '#ffd500', 'circle-opacity': 0.8 }
           });
 
           // 🔹 Zoom automático
-          const allFeatures = [...ArtistasFeatures, ...EspaciosFeatures];
+          const allFeatures = [...formularioFeatures, ...manualesFeatures];
           if (allFeatures.length > 0) {
             const bounds = new mapboxgl.LngLatBounds();
             allFeatures.forEach(f => bounds.extend(f.geometry.coordinates));
             map.fitBounds(bounds, { padding: 50, maxZoom: 14, duration: 1000 });
           }
 
-          // 🔹 Popups para Artistas y Espacios
-          ['Artistas-layer', 'Espacios-layer'].forEach(layer => {
+          // 🔹 Popups para formulario y manuales
+          ['formulario-layer', 'manuales-layer'].forEach(layer => {
             map.on('click', layer, (e) => {
               const props = e.features[0].properties;
               const popupContent = `
