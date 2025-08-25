@@ -84,6 +84,33 @@
               'circle-opacity': 0.8
             }
           });
+          // Agregar rutas
+
+           async function drawWalkingRoute(id, coords, color) {
+      const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${coords.map(c => c.join(',')).join(';')}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+      const query = await fetch(url);
+      const json = await query.json();
+      const data = json.routes[0].geometry;
+
+      map.addSource(id, {
+        type: 'geojson',
+        data: { type: 'Feature', geometry: data }
+      });
+
+      map.addLayer({
+        id,
+        type: 'line',
+        source: id,
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': color, 'line-width': 4 }
+      });
+    }
+
+    // Dibujar 3 rutas predefinidas
+    drawWalkingRoute("Ruta1", [[-70.6506,-33.4372],[-70.6455,-33.4350]], "#FF5733");
+    drawWalkingRoute("Ruta2", [[-70.6438,-33.4350],[-70.6390,-33.4330]], "#33C1FF");
+    drawWalkingRoute("Ruta3", [[-70.6470,-33.4375],[-70.6425,-33.4360]], "#28A745");
+  });
 
           // Agregar fuente y capa para manuales (amarillo)
           map.addSource('Espacios', {
