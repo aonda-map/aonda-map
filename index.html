@@ -10,7 +10,7 @@
     html, body { margin: 0; padding: 0; height: 100%; }
     #map { position: absolute; top: 0; bottom: 0; width: 100%; }
 
-    /* leyenda */
+    /* Leyenda */
     .legend {
       position: absolute;
       bottom: 20px;
@@ -46,131 +46,125 @@
     <div class="legend-item">
       <div class="color-box" style="background:#ffd500;"></div> Espacios
     </div>
+    <div class="legend-item">
+      <div class="color-box" style="background:#FF5733;"></div> Ruta A
+    </div>
+    <div class="legend-item">
+      <div class="color-box" style="background:#33C1FF;"></div> Ruta B
+    </div>
+    <div class="legend-item">
+      <div class="color-box" style="background:#28A745;"></div> Ruta C
+    </div>
   </div>
 
   <script>
+    // 🔹 Reemplaza con tu Mapbox Access Token
     mapboxgl.accessToken = 'pk.eyJ1IjoiYW9uZGEiLCJhIjoiY21janQ5M2w4MDc2NTJrcTV2bmt5N2U5ZiJ9.KvPbGg8-gbhEdkMWv8tDeQ';
+
 
     const map = new mapboxgl.Map({
       container: 'map',
+      // 🔹 Reemplaza con tu estilo Mapbox si tienes uno personalizado
       style: 'mapbox://styles/aonda/cmcl95wcg008l01s0573uba6f',
       center: [-70.6483, -33.4569],
       zoom: 11
     });
 
     map.on('load', () => {
-      fetch('https://script.google.com/macros/s/AKfycbzy0FpgaRRm4JhlH-qu5TkikwcMIYcdRhBXxiCYXad54Qcg7BvqnxiYh4QXWOQpIZwP/exec')
+      // 🔹 Cargar datos 
+      fetch('https://script.google.com/macros/s/AKfycbwJ0sYjOe-NkQjuuVCj6IhPdVL7b5KaKSHAmnDV6HdMu6yfHx0tPNFpd0v8Lk2N2dtB/exec')
         .then(response => response.json())
         .then(data => {
           const ArtistasFeatures = data.features.filter(f => f.properties.grupo === 'Artistas');
           const EspaciosFeatures = data.features.filter(f => f.properties.grupo === 'Espacios');
 
-          // Agregar fuente y capa para formulario (rosado)
+          // 🔹 Función para dibujar rutas caminando
+          async function drawWalkingRoute(id, coords, color) {
+            const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${coords.map(c => c.join(',')).join(';')}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+            const query = await fetch(url);
+            const json = await query.json();
+            const routeData = json.routes[0].geometry;
+
+            map.addSource(id, {
+              type: 'geojson',
+              data: { type: 'Feature', geometry: routeData }
+            });
+
+            map.addLayer({
+              id,
+              type: 'line',
+              source: id,
+              layout: { 'line-join': 'round', 'line-cap': 'round' },
+              paint: { 'line-color': color, 'line-width': 4 }
+            });
+          }
+
+          // 🔹 Aquí defines las 3 rutas caminando (puedes cambiar coordenadas)
+          drawWalkingRoute("ruta1", [
+            [-70.644406, -33.4972],
+            [-70.645, -33.4350]
+          ], "#FF5733"); // Ruta A
+
+          drawWalkingRoute("ruta2", [
+            [-70.67342079266722, -33.44930732087102],
+            [-70.61111238477345, -33.42258637747439]
+          ], "#33C1FF"); // Ruta B
+
+          drawWalkingRoute("ruta3", [
+            [-70.6970, -33.4395],
+            [-70.6125, -33.42360]
+          ], "#28A745"); // Ruta C
+
+          // 🔹 Agregar markers de Artistas
           map.addSource('Artistas', {
             type: 'geojson',
-            data: {
-              type: 'FeatureCollection',
-              features: ArtistasFeatures
-            }
+            data: { type: 'FeatureCollection', features: ArtistasFeatures }
           });
-
           map.addLayer({
             id: 'Artistas-layer',
             type: 'circle',
             source: 'Artistas',
-            paint: {
-              'circle-radius': 6,
-              'circle-color': '#d04e7c',
-              'circle-opacity': 0.8
-            }
+            paint: { 'circle-radius': 6, 'circle-color': '#d04e7c', 'circle-opacity': 0.8 }
           });
-          // Agregar rutas
 
-           async function drawWalkingRoute(id, coords, color) {
-      const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${coords.map(c => c.join(',')).join(';')}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
-      const query = await fetch(url);
-      const json = await query.json();
-      const data = json.routes[0].geometry;
-
-      map.addSource(id, {
-        type: 'geojson',
-        data: { type: 'Feature', geometry: data }
-      });
-
-      map.addLayer({
-        id,
-        type: 'line',
-        source: id,
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': color, 'line-width': 4 }
-      });
-    }
-
-    // Dibujar 3 rutas predefinidas
-    drawWalkingRoute("Ruta1", [[-70.6506,-33.4372],[-70.6455,-33.4350]], "#FF5733");
-    drawWalkingRoute("Ruta2", [[-70.6438,-33.4350],[-70.6390,-33.4330]], "#33C1FF");
-    drawWalkingRoute("Ruta3", [[-70.6470,-33.4375],[-70.6425,-33.4360]], "#28A745");
-  });
-
-          // Agregar fuente y capa para manuales (amarillo)
+          // 🔹 Agregar markers de Espacios
           map.addSource('Espacios', {
             type: 'geojson',
-            data: {
-              type: 'FeatureCollection',
-              features: EspaciosFeatures
-            }
+            data: { type: 'FeatureCollection', features: EspaciosFeatures }
           });
-
           map.addLayer({
             id: 'Espacios-layer',
             type: 'circle',
             source: 'Espacios',
-            paint: {
-              'circle-radius': 6,
-              'circle-color': '#ffd500',
-              'circle-opacity': 0.8
-            }
+            paint: { 'circle-radius': 6, 'circle-color': '#ffd500', 'circle-opacity': 0.8 }
           });
 
-          // Zoom automático ajustando a todos los pines
+          // 🔹 Zoom automático
           const allFeatures = [...ArtistasFeatures, ...EspaciosFeatures];
           if (allFeatures.length > 0) {
             const bounds = new mapboxgl.LngLatBounds();
-            allFeatures.forEach(f => {
-              bounds.extend(f.geometry.coordinates);
-            });
+            allFeatures.forEach(f => bounds.extend(f.geometry.coordinates));
             map.fitBounds(bounds, { padding: 50, maxZoom: 14, duration: 1000 });
           }
 
-          // Popups para ambas capas
+          // 🔹 Popups para Artistas y Espacios
           ['Artistas-layer', 'Espacios-layer'].forEach(layer => {
             map.on('click', layer, (e) => {
               const props = e.features[0].properties;
               const popupContent = `
                 <strong>${props.nombre}</strong><br>
                 <em>${props.disciplina}</em><br>
-                ${props.descripcion}<br>
+                ${props.descripcion || ''}<br>
                 ${props.enlace ? `<a href="${props.enlace}" target="_blank">ver portafolio</a><br>` : ''}
-                ${props.direccion}
+                ${props.direccion || ''}
               `;
-              new mapboxgl.Popup()
-                .setLngLat(e.lngLat)
-                .setHTML(popupContent)
-                .addTo(map);
+              new mapboxgl.Popup().setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
             });
-
-            map.on('mouseenter', layer, () => {
-              map.getCanvas().style.cursor = 'pointer';
-            });
-
-            map.on('mouseleave', layer, () => {
-              map.getCanvas().style.cursor = '';
-            });
+            map.on('mouseenter', layer, () => map.getCanvas().style.cursor = 'pointer');
+            map.on('mouseleave', layer, () => map.getCanvas().style.cursor = '');
           });
         })
-        .catch(error => {
-          console.error('❌ Error cargando datos del script:', error);
-        });
+        .catch(error => console.error('❌ Error cargando datos del script:', error));
     });
   </script>
 </body>
